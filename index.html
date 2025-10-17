@@ -70,7 +70,7 @@
 </head>
 
 <body>
-  <h2>♻️ Ứng dụng phân loại rác bằng AI</h2>
+  <h2>♻️ ỨNG DỤNG PHÂN LOẠI RÁC BẰNG AI</h2>
 
   <label for="classCode">Nhập mã lớp:</label>
   <input type="text" id="classCode" placeholder="VD: 10A1" />
@@ -87,7 +87,7 @@
   </div>
 
   <div id="footer">
-    <p>Made by học sinh THPT TRẦN QUỐC TUẤN - Dự án “Lớp học xanh” 🌿</p>
+    <p>Made by học sinh THPT TRẦN QUỐC TUẤN- Dự án “Lớp học xanh” 🌿</p>
   </div>
 
   <!-- Thư viện TensorFlow.js và Teachable Machine -->
@@ -109,9 +109,13 @@
       // 2. Mở camera
       const flip = true; // lật hình cho giống gương
       webcam = new tmImage.Webcam(320, 240, flip);
-      await webcam.setup();
-      await webcam.play();
-      window.requestAnimationFrame(loop);
+try {
+  await webcam.setup({ facingMode: "environment" }); // dùng camera sau
+  await webcam.play();
+} catch (err) {
+  alert("Không thể truy cập camera. Hãy kiểm tra quyền camera hoặc HTTPS.");
+  console.error("Lỗi camera:", err);
+}      window.requestAnimationFrame(loop);
       document.getElementById("camera-container").appendChild(webcam.canvas);
     }
 
