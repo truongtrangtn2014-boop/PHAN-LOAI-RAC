@@ -2,10 +2,9 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Phân loại rác bằng AI - THPT Trần Quốc Tuấn</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Phân loại rác bằng AI</title>
 
-  <!-- Liên kết CSS để làm đẹp -->
   <style>
     body {
       font-family: "Arial", sans-serif;
@@ -13,28 +12,163 @@
       background: #f5f7fa;
       color: #333;
       margin: 0;
-      padding: 20px;
+      padding: 10px;
     }
 
     h2 {
       color: #2e7d32;
+      margin-top: 10px;
+      font-size: 1.3rem;
     }
 
     #camera-container {
       margin: 15px auto;
-      border: 2px solid #4caf50;
-      border-radius: 10px;
-      width: 320px;
-      height: 240px;
+      border: 3px solid #4caf50;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 360px;
+      height: auto;
       overflow: hidden;
-      background: black;
+    }
+
+    video, canvas {
+      width: 100%;
+      height: auto;
+      border-radius: 10px;
     }
 
     input {
-      padding: 6px;
-      margin: 5px;
+      padding: 10px;
+      margin: 10px;
       border: 1px solid #aaa;
-      border-radius: 5px;
-      width: 150px;
+      border-radius: 8px;
+      width: 70%;
+      font-size: 1rem;
       text-align: center;
     }
+
+    button {
+      background: #4caf50;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      width: 80%;
+      max-width: 300px;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #388e3c;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 1.1rem;
+      background: #e8f5e9;
+      border-radius: 12px;
+      padding: 15px;
+      display: inline-block;
+      width: 80%;
+      max-width: 320px;
+    }
+
+    #footer {
+      margin-top: 25px;
+      font-size: 0.85rem;
+      color: #777;
+    }
+
+    /* Tăng kích thước cho điện thoại */
+    @media (max-width: 600px) {
+      h2 { font-size: 1.2rem; }
+      button { font-size: 1rem; padding: 10px; }
+      input { font-size: 0.95rem; }
+    }
+  </style>
+</head>
+
+<body>
+  <h2>♻️ Ứng dụng phân loại rác bằng AI</h2>
+
+  <label for="classCode">Nhập mã lớp:</label><br>
+  <input type="text" id="classCode" placeholder="VD: 10A1" /><br>
+
+  <div id="camera-container">
+    <video id="webcam" autoplay playsinline></video>
+  </div>
+
+  <button id="startBtn">🎬 Bắt đầu nhận diện</button>
+
+  <div id="result">
+    <p><strong>Loại rác:</strong> <span id="label">---</span></p>
+    <p><strong>Độ chính xác:</strong> <span id="confidence">---</span></p>
+  </div>
+
+  <div id="footer">
+    <p>Made by học sinh THPT TRẦN QUỐC TUẤN - Dự án “Lớp học xanh” 🌿</p>
+  </div>
+
+  <!-- Thư viện TensorFlow.js và Teachable Machine -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.20.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
+
+  <script>
+    const URL = "model/"; // Thư mục chứa model bạn tải lên GitHub
+    let model, webcam, maxPredictions, isRunning = false;
+
+    async function init() {
+      if (isRunning) return;
+      isRunning = true;
+
+      document.getElementById("startBtn").innerText = "🔍 Đang nhận diện...";
+      document.getElementById("startBtn").disabled = true;
+
+      const modelURL = URL + "model.json";
+      const metadataURL = URL + "metadata.json";
+      model = await tmImage.load(modelURL, metadataURL);
+      maxPredictions = model.getTotalClasses();
+
+      const flip = true;
+      webcam = new tmImage.Webcam(320, 240, flip);
+      await webcam.setup();
+      await webcam.play();
+      window.requestAnimationFrame(loop);
+      document.getElementById("camera-container").appendChild(webcam.canvas);
+    }
+
+    async function loop() {
+      webcam.update();
+      await predict();
+      window.requestAnimationFrame(loop);
+    }
+
+    async function predict() {
+      const prediction = await model.predict(webcam.canvas);
+      let best = prediction[0];
+      for (let i = 1; i < prediction.length; i++) {
+        if (prediction[i].probability > best.probability) best = prediction[i];
+      }
+
+      document.getElementById("label").innerText = best.className;
+      document.getElementById("confidence").innerText =
+        (best.probability * 100).toFixed(1) + "%";
+
+      const classCode = document.getElementById("classCode").value.trim();
+      if (classCode && best.probability > 0.9) {
+        const data = {
+          class: classCode,
+          trashType: best.className,
+          confidence: best.probability,
+          time: new Date().toLocaleString("vi-VN"),
+        };
+        console.log("📤 Dữ liệu:", data);
+      }
+    }
+
+    document.getElementById("startBtn").addEventListener("click", init);
+  </script>
+</body>
+</html>
