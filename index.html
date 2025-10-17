@@ -3,75 +3,38 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Phân loại rác bằng AI</title>
+  <title>Phân loại rác bằng AI - THPT Trần Quốc Tuấn</title>
+
+  <!-- Liên kết CSS để làm đẹp -->
   <style>
-    body {font-family: Arial, sans-serif; text-align: center; background: #f5f7fa; color: #333; margin: 0; padding: 20px;}
-    h2 {color: #2e7d32;}
-    #camera-container {margin: 15px auto; border: 2px solid #4caf50; border-radius: 10px; width: 320px; height: 240px; overflow: hidden;}
-    input {padding: 6px; margin: 5px; border: 1px solid #aaa; border-radius: 5px; width: 150px; text-align: center;}
-    button {background: #4caf50; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 16px;}
-    button:hover {background: #43a047;}
-    #result {margin-top: 15px; font-size: 18px; background: #e8f5e9; border-radius: 10px; padding: 10px; display: inline-block;}
-    #footer {margin-top: 25px; font-size: 14px; color: #777;}
-  </style>
-</head>
-
-<body>
-  <h2>♻️ Ứng dụng phân loại rác bằng AI</h2>
-  <label for="classCode">Nhập mã lớp:</label>
-  <input type="text" id="classCode" placeholder="VD: 10A1" />
-  <div id="camera-container">
-    <video id="webcam" autoplay playsinline width="320" height="240"></video>
-  </div>
-  <button id="startBtn">Bắt đầu nhận diện</button>
-  <div id="result">
-    <p><strong>Loại rác:</strong> <span id="label">---</span></p>
-    <p><strong>Độ chính xác:</strong> <span id="confidence">---</span></p>
-  </div>
-  <div id="footer">
-    <p>Made by học sinh THPT - Dự án “Lớp học xanh” 🌿</p>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.20.0"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
-
-  <script>
-    const URL = "./"; // model nằm cùng thư mục
-    let model, webcam, maxPredictions;
-
-    async function init() {
-      const modelURL = URL + "model.json";
-      const metadataURL = URL + "metadata.json";
-      model = await tmImage.load(modelURL, metadataURL);
-      maxPredictions = model.getTotalClasses();
-
-      const flip = true;
-      webcam = new tmImage.Webcam(320, 240, flip);
-      await webcam.setup();
-      await webcam.play();
-      window.requestAnimationFrame(loop);
-      document.getElementById("camera-container").appendChild(webcam.canvas);
+    body {
+      font-family: "Arial", sans-serif;
+      text-align: center;
+      background: #f5f7fa;
+      color: #333;
+      margin: 0;
+      padding: 20px;
     }
 
-    async function loop() {
-      webcam.update();
-      await predict();
-      window.requestAnimationFrame(loop);
+    h2 {
+      color: #2e7d32;
     }
 
-    async function predict() {
-      const prediction = await model.predict(webcam.canvas);
-      let best = prediction[0];
-      for (let i = 1; i < prediction.length; i++) {
-        if (prediction[i].probability > best.probability) {
-          best = prediction[i];
-        }
-      }
-      document.getElementById("label").innerText = best.className;
-      document.getElementById("confidence").innerText = (best.probability * 100).toFixed(2) + "%";
+    #camera-container {
+      margin: 15px auto;
+      border: 2px solid #4caf50;
+      border-radius: 10px;
+      width: 320px;
+      height: 240px;
+      overflow: hidden;
+      background: black;
     }
 
-    document.getElementById("startBtn").addEventListener("click", init);
-  </script>
-</body>
-</html>
+    input {
+      padding: 6px;
+      margin: 5px;
+      border: 1px solid #aaa;
+      border-radius: 5px;
+      width: 150px;
+      text-align: center;
+    }
